@@ -1,5 +1,5 @@
 import React, { useEffect, ChangeEvent } from 'react';
-import { switchMap, catchError, filter, tap } from 'rxjs/operators';
+import { switchMap, catchError, filter, tap, map } from 'rxjs/operators';
 import { fromFetch } from 'rxjs/fetch';
 import { of } from 'rxjs';
 import './App.css';
@@ -12,15 +12,25 @@ interface TProps {}
 
 const VALIDATION_DEBOUNCE_TIME_MILLIS = 500;
 
+const randomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 const App: React.FC<TProps> = props => {
   const [monsters, setMonsters] = React.useState<IMonster[]>([]);
   const [searchField, setSearchField] = React.useState<string>('');
 
+  const pucul: IMonster = {
+    id: randomInt(20, 30).toString(),
+    email: 'pucul@pucul.com',
+    name: 'PUCUL'
+  }
   useEffect(() => {
     fromFetch('https://jsonplaceholder.typicode.com/users')
       .pipe(
         filter(res => res.ok),
         switchMap(response => response.json()),
+        map(monsters => [pucul, ...monsters]),
         tap(users => setMonsters(users)),
         catchError(err => of({ error: true, message: err.message }))
       )
